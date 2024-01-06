@@ -22,7 +22,7 @@ namespace GerenciadorDeTarefas.Models.Users
         {
             this._name = name;
             this._email = email;
-            this._password = password;
+            this._password = HashClass.SetHashPassword(password);
         }
 
         public void UpdatePassword(string oldPassword, string password)
@@ -30,6 +30,7 @@ namespace GerenciadorDeTarefas.Models.Users
             try 
             {
                 _password = HashClass.UpdatePassword(oldPassword, Password, password);
+                Console.WriteLine("Senha atualizada com sucesso!");
             } 
             catch (Exception ex)
             {
@@ -40,6 +41,15 @@ namespace GerenciadorDeTarefas.Models.Users
 
         public void ForgotPassword(string name, string password)
         {
+            try 
+            {
+                HashClass.ForgotPassword(name, Name, password);
+                Console.WriteLine("Senha atualizada com sucesso!");
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"Erro ao atualizar a senha: {ex.Message}");
+            }
 
         }
 
