@@ -24,7 +24,7 @@ namespace GerenciadorDeTarefas.Utils
 
         public static void ForgotPassword(string property, string propertySaved, string newPassword)
         {
-            if (VerifyProperty(property, propertySaved))
+            if (CompareProperties.VerifyProperty(property, propertySaved))
             {
                 SetHashPassword(newPassword);
             }
@@ -34,12 +34,7 @@ namespace GerenciadorDeTarefas.Utils
             }
         }
 
-        private static bool VerifyProperty(string property, string propertySaved)
-        {
-            return propertySaved == property;
-        }
-
-        private static string SetHashPassword(string newPassword)
+        public static string SetHashPassword(string newPassword)
         {
             using (SHA256 sha256 = SHA256.Create())
             {
