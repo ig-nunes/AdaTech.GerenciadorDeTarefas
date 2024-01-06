@@ -1,4 +1,5 @@
 ﻿using GerenciadorDeTarefas.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,13 +18,16 @@ namespace GerenciadorDeTarefas.Models.Users
         public string Name { get { return _name; } }
         public string Email { get { return _email; } }
         public string Password { get { return _password; } }
+        public virtual UserType UserType { get; }
+
 
         public User(string name, string email, string password) 
         {
             this._name = name;
             this._email = email;
-            this._password = HashClass.SetHashPassword(password);
+            this._password = password;
         }
+
 
         public void UpdatePassword(string oldPassword, string password)
         {
