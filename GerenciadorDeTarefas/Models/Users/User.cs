@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GerenciadorDeTarefas.Utils;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -24,9 +25,22 @@ namespace GerenciadorDeTarefas.Models.Users
             this._password = password;
         }
 
-        public void UpdatePassword(string password)
+        public void UpdatePassword(string oldPassword, string password)
         {
-            _password = password;
+            try 
+            {
+                _password = HashClass.UpdatePassword(oldPassword, Password, password);
+            } 
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao atualizar a senha: {ex.Message}");
+            }
+            
+        }
+
+        public void ForgotPassword(string name, string password)
+        {
+
         }
 
         public void UpdateEmail(string email)
