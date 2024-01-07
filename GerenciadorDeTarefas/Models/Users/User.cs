@@ -1,4 +1,5 @@
-﻿using GerenciadorDeTarefas.Utils;
+﻿using GerenciadorDeTarefas.AccessStrategy;
+using GerenciadorDeTarefas.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ namespace GerenciadorDeTarefas.Models.Users
         private string _name;
         private string _email;
         private string _password;
+        private IAccessStrategy _accessStrategy;
 
         public string Name { get { return _name; } }
         public string Email { get { return _email; } }
@@ -26,6 +28,16 @@ namespace GerenciadorDeTarefas.Models.Users
             this._name = name;
             this._email = email;
             this._password = password;
+        }
+
+        public IAccessStrategy GetAccessStrategy() 
+        { 
+            return _accessStrategy; 
+        }
+
+        public void SetAccessStrategy(IAccessStrategy accessStrategy) 
+        {  
+            _accessStrategy = accessStrategy; 
         }
 
 
