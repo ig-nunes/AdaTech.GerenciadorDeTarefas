@@ -10,7 +10,7 @@ using GerenciadorDeTarefas.Utils;
 
 namespace GerenciadorDeTarefas.Repositories
 {
-    internal class UserManager
+    public class UserManager
     {
         private const string FilePath = "users.json";
 
@@ -19,16 +19,20 @@ namespace GerenciadorDeTarefas.Repositories
             if (!File.Exists(FilePath) || new FileInfo(FilePath).Length == 0)
             {
                 string hashPassword = HashClass.SetHashPassword("senha123");
+
                 // Criar um TechLeader padrão se o arquivo estiver vazio ou não existir:
                 var defaultTechLeader = new TechLeader("techLeader", "tech@email.com", hashPassword);
 
-                var initialUser = new List<User> { defaultTechLeader };
+                // Criar um Developer padrão se o arquivo estiver vazio ou não existir:
+                var defaultDeveloper = new Developer("developer", "dev@email.com", hashPassword);
+
+                var initialUser = new List<User> { defaultTechLeader, defaultDeveloper };
                 SaveUsers(initialUser);
             }
 
         }
 
-        public static void SaveUser(User user)
+        public static void SaveUser(User? user)
         {
             List<User> users = LoadUsers();
             users.Add(user);
