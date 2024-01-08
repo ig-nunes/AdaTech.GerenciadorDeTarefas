@@ -1,4 +1,6 @@
-﻿using GerenciadorDeTarefas.Utils;
+﻿using GerenciadorDeTarefas.AccessStrategy;
+using GerenciadorDeTarefas.Utils;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,10 +15,13 @@ namespace GerenciadorDeTarefas.Models.Users
         private string _name;
         private string _email;
         private string _password;
+        private IAccessStrategy _accessStrategy;
 
         public string Name { get { return _name; } }
         public string Email { get { return _email; } }
         public string Password { get { return _password; } }
+        public virtual UserType UserType { get; }
+
 
         public User(string name, string email, string password) 
         {
@@ -25,11 +30,23 @@ namespace GerenciadorDeTarefas.Models.Users
             this._password = password;
         }
 
+        public IAccessStrategy GetAccessStrategy() 
+        { 
+            return _accessStrategy; 
+        }
+
+        public void SetAccessStrategy(IAccessStrategy accessStrategy) 
+        {  
+            _accessStrategy = accessStrategy; 
+        }
+
+
         public void UpdatePassword(string oldPassword, string password)
         {
             try 
             {
                 _password = HashClass.UpdatePassword(oldPassword, Password, password);
+                Console.WriteLine("Senha atualizada com sucesso!");
             } 
             catch (Exception ex)
             {
@@ -40,6 +57,15 @@ namespace GerenciadorDeTarefas.Models.Users
 
         public void ForgotPassword(string name, string password)
         {
+            try 
+            {
+                HashClass.ForgotPassword(name, Name, password);
+                Console.WriteLine("Senha atualizada com sucesso!");
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"Erro ao atualizar a senha: {ex.Message}");
+            }
 
         }
 
