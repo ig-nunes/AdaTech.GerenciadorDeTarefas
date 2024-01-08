@@ -47,7 +47,7 @@ namespace GerenciadorDeTarefas.Repositories
             return users.Find(u => u.Email == email && u.Password == hashPassword);
         }
 
-        private static List<User> LoadUsers()
+        public static List<User> LoadUsers()
         {
             List<User> users = new List<User>();
 
