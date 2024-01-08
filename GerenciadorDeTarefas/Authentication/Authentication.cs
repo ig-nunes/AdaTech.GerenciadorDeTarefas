@@ -25,11 +25,13 @@ namespace GerenciadorDeTarefas.Authentication
             if (authenticatedUser != null)
             {
                 Console.WriteLine($"Usuário autenticado com sucesso!");
+                Thread.Sleep(2000);
                 return authenticatedUser;
             }
             else
             {
                 Console.WriteLine("Falha na autenticação. Email ou senha incorretos.");
+                Thread.Sleep(2000);
                 return null;
             }
         }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace GerenciadorDeTarefas.Models.Users
 {
-    public abstract class User
+    public class User
     {
         private string _name;
         private string _email;
@@ -78,6 +78,12 @@ namespace GerenciadorDeTarefas.Models.Users
         {
             _name = name;
         }
+
+        public override string ToString()
+        {
+            return $"Name: {Name}, Email: {Email}, UserType: {UserType}";
+        }
+
 
     }
 }
