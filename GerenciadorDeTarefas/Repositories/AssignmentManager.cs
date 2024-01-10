@@ -37,19 +37,71 @@ namespace GerenciadorDeTarefas.Repositories
             return _assignments.FirstOrDefault(a => a.Name == name);
         }
 
+        public static List<Assignment> GetAssignmentsByNames(string[] taskNames)
+        {
+            LoadAssignmentsFromJson();
+            List<Assignment> tasks = _assignments;
+
+            List<Assignment> matchingTasks = tasks
+                .Where(task => taskNames.Contains(task.Name))
+                .ToList();
+
+            return matchingTasks;
+        }
+
+        public static List<Assignment> GetAssignmentsByUser(User user)
+        {
+            LoadAssignmentsFromJson();
+            List<Assignment> tasks = _assignments;
+
+            List<Assignment> userTasks = tasks
+                .Where(task => task.Dev != null && task.Dev.Name == user.Name)
+                .ToList();
+
+            return userTasks;
+        }
+
+        public static List<Assignment> GetAssignmentsByUserAndRelatedTasks(User user)
+        {
+            List<Assignment> tasksByUser = GetAssignmentsByUser(user);
+            List<Assignment> finalAssignments = new List<Assignment>(tasksByUser);
+
+            foreach (var taskByUser in tasksByUser)
+            {
+                if (taskByUser.RelatedTasks != null)
+                {
+                    foreach (var relatedTaskName in taskByUser.RelatedTasks)
+                    {
+                        List<Assignment> relatedTasks = GetAssignmentsByNames(new string[] { relatedTaskName });
+
+                        foreach (var relatedTask in relatedTasks)
+                        {
+                            if (!finalAssignments.Contains(relatedTask))
+                            {
+                                finalAssignments.Add(relatedTask);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return finalAssignments;
+        }
+
         public static void SaveNewAssignment(Assignment assignment)
         {
+            LoadAssignmentsFromJson();
             _assignments.Add(assignment);
             SaveAssignmentsToJson();
         }
 
         public static void SaveAssignmentEdits(Assignment editedAssignment)
         {
+            LoadAssignmentsFromJson();
             var existingAssignment = _assignments.FirstOrDefault(a => a.Name == editedAssignment.Name);
 
             if (existingAssignment != null)
             {
-                // Update properties
                 existingAssignment.Description = editedAssignment.Description;
                 existingAssignment.Dev = editedAssignment.Dev;
                 existingAssignment.Status = editedAssignment.Status;
@@ -62,7 +114,7 @@ namespace GerenciadorDeTarefas.Repositories
 
         private static void LoadAssignmentsFromJson()
         {
-            if (_assignments == null) // Carrega apenas se a lista ainda não foi inicializada
+            if (_assignments == null)
             {
                 if (File.Exists(JsonFileName))
                 {
