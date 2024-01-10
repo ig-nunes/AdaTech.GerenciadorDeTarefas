@@ -5,6 +5,7 @@ using GerenciadorDeTarefas.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GerenciadorDeTarefas.AccessStrategy
 {
@@ -21,7 +22,7 @@ namespace GerenciadorDeTarefas.AccessStrategy
                     $"  2 - Criar nova tarefa;\n" +
                     $"  3 - Visualizar todos os Desenvolvedores;\n" +
                     $"  4 - Adicionar Desenvolvedor;\n" +
-                    $"  5 - Fazer Logout\n"
+                    $"  5 - Fazer Logout.\n"
                     );
                 string selection = Console.ReadLine();
 
@@ -34,21 +35,37 @@ namespace GerenciadorDeTarefas.AccessStrategy
                         CreateNewAssignment();
                         break;
                     case "3":
+                        ViewAllDevelopers();
                         break;
                     case "4":
                         Register();
-                        Console.WriteLine("Usuário Criado com sucesso!");
-                        Console.ReadKey();
                         break; ;
                     case "5":
-                        Console.WriteLine("Voltando menu inicial...");
-                        Thread.Sleep(2000);
-                        Console.Clear();
+                        Messages.ExitMenu("Voltando menu inicial...");
                         return;
                     default:
+                        Console.WriteLine("Valor inválido.");
                         break;
                 }
             }
+        }
+
+        private void ViewAllDevelopers()
+        {
+            var developersList = UserManager.LoadUsers();
+            Console.WriteLine("Todos os usuários:\n");
+            int position = 0;
+            foreach (User user in developersList)
+            {
+                var type = user.UserType == UserType.Developer ? "Desenvolvedor" : "Tech Leader";
+                Console.WriteLine($"{position} - {user.Name}:");
+                Console.WriteLine($"    Tipo de usuário: {type} ");
+                Console.WriteLine($"    E-mail: {user.Email}\n");
+                position++;
+            }
+
+            Messages.PressAnyKeyToContinue();
+            Console.Clear();
         }
 
         private static void CreateNewAssignment()
@@ -136,7 +153,7 @@ namespace GerenciadorDeTarefas.AccessStrategy
                 Console.WriteLine($"Escolha o que deseja fazer:\n" +
                     $"  1 - Editar Descricao;\n" +
                     $"  2 - Atribuir a usuário;\n" +
-                    $"  3 - Aterar status da tarefa;\n" +
+                    $"  3 - Alterar status da tarefa;\n" +
                     $"  4 - Adicionar tarefas relacionadas;\n" +
                     $"  5 - Sair menu de edição;\n");
                 var selection = Console.ReadLine();
@@ -184,11 +201,57 @@ namespace GerenciadorDeTarefas.AccessStrategy
                         }
                         break;
                     case "4":
+                        var allTasks = AssignmentManager.GetAllAssignments();
+                        Console.WriteLine("Todas as tarefas:");
+                        var number = 0;
+                        foreach (var assignment in allTasks)
+                        {
+                            var name = assignment.Name;
+                            var statusTaks = assignment.Status;
+                            var description = assignment.Description;
+                            var user = assignment.Dev != null ? assignment.Dev.ToString() : "Nenhum usuário atribuído";
+
+                            Console.WriteLine($"{number} - {name}:");
+                            Console.WriteLine($"    Status: {statusTaks}");
+                            Console.WriteLine($"    Descrição: {description}");
+                            Console.WriteLine($"    Usuário atribuído: {user}");
+
+                            Console.WriteLine();
+                            number++;
+                        }
+
+                        Console.WriteLine("Digite os nomes das tarefas que você deseja adicionar como relacionadas, separados por uma vírgula e um espaço (', ') :");
+                        var taskNamesInput = Console.ReadLine();
+
+                        if (!string.IsNullOrWhiteSpace(taskNamesInput))
+                        {
+                            var listNames = taskNamesInput.Split(", ");
+                            var assignmentsFound = AssignmentManager.GetAssignmentsByNames(listNames);
+
+                            if (assignmentsFound.Count > 0)
+                            {
+                                var relatedTaskNames = task.RelatedTasks ?? new List<string>();
+                                relatedTaskNames.AddRange(listNames);
+
+                                task.RelatedTasks = relatedTaskNames;
+
+                                AssignmentManager.SaveAssignmentEdits(task);
+
+                                Console.WriteLine("Tarefas relacionadas adicionadas com sucesso!");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Não foi encontrado tarefa(s) com esse(s) nome(s).");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Argumento inválido ou vazio");
+                        }
+
                         break;
                     case "5":
-                        Console.WriteLine("Saindo menu de edição...");
-                        Thread.Sleep(2000);
-                        Console.Clear();
+                        Messages.ExitMenu("Saindo menu de edição...");
                         return;
                     default:
                         Console.WriteLine("Valor inválido.Tente novamente:");
@@ -202,69 +265,79 @@ namespace GerenciadorDeTarefas.AccessStrategy
 
         private static void Register()
         {
+            User? user;
+            string name, email, password;
+            
             while (true)
             {
-                User? user;
                 Console.Write("Digite seu nome: ");
-                string name = Console.ReadLine()!;
+                name = Console.ReadLine()!;
 
                 Console.Write("Digite seu email: ");
-                string email = Console.ReadLine()!;
+                email = Console.ReadLine()!;
 
                 Console.Write("Digite uma senha: ");
-                string password = Console.ReadLine()!;
+                password = Console.ReadLine()!;
 
-                UserType? userType = null;
-
-                var condition = true;
-
-                while (condition)
+                if (name == null || email == null || password == null)
                 {
-                    Console.Write($"Escolha o tipo de usuário:\n" +
-                        $"  1 - Tech Leader;\n" +
-                        $"  2 - Developer;\n");
-                    string type = Console.ReadLine()!;
-
-                    switch (type)
-                    {
-                        case "1":
-                            userType = UserType.TechLeader;
-                            condition = false;
-                            break;
-                        case "2":
-                            userType = UserType.Developer;
-                            condition = false;
-                            break;
-                        default:
-                            Console.WriteLine("Erro: Valor não válido.");
-                            Console.ReadKey();
-                            break;
-                    }
-                    Console.Clear();
+                    Console.WriteLine("Por favor, nenhum dos campos podem ser nulos!");
                 }
-
-                Console.WriteLine($"Usuário:\n" +
-                    $"Nome: {name}\n" +
-                    $"E-mail: {email}\n" +
-                    $"Password: {password}\n" +
-                    $"Tipo: {userType.ToString()}");
-
-                Console.ReadKey();
-
-                string hashPassword = HashClass.SetHashPassword(password);
-
-                if (userType == UserType.TechLeader)
+                else
                 {
-                    user = new TechLeader(name, email, hashPassword);
-                    UserManager.SaveUser(user);
-                }
-                else if (userType == UserType.Developer)
-                {
-                    user = new Developer(name, email, hashPassword);
-                    UserManager.SaveUser(user);
-                }
-                break;
+                    break;
+                }                
             }
+
+            UserType? userType = null;
+
+            var condition = true;
+
+            while (condition)
+            {
+                Console.Write($"Escolha o tipo de usuário:\n" +
+                    $"  1 - Tech Leader;\n" +
+                    $"  2 - Developer;\n");
+                string type = Console.ReadLine()!;
+
+                switch (type)
+                {
+                    case "1":
+                        userType = UserType.TechLeader;
+                        condition = false;
+                        break;
+                    case "2":
+                        userType = UserType.Developer;
+                        condition = false;
+                        break;
+                    default:
+                        Console.WriteLine("Erro: Valor não válido.");
+                        Console.ReadKey();
+                        break;
+                }
+                Console.Clear();
+            }
+
+            Console.WriteLine($"Usuário:\n" +
+                $"Nome: {name}\n" +
+                $"E-mail: {email}\n" +
+                $"Password: {password}\n" +
+                $"Tipo: {userType.ToString()}\n");              
+
+            string hashPassword = HashClass.SetHashPassword(password);
+
+            if (userType == UserType.TechLeader)
+            {
+                user = new TechLeader(name, email, hashPassword);
+                UserManager.SaveUser(user);
+            }
+            else if (userType == UserType.Developer)
+            {
+                user = new Developer(name, email, hashPassword);
+                UserManager.SaveUser(user);
+            }
+            Messages.PressAnyKeyToContinue("Usuário criado com sucesso! Aperte qualquer botão para continuar.");
+            
         }
     }
 }
