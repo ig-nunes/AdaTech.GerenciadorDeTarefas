@@ -14,7 +14,7 @@ namespace GerenciadorDeTarefas.Models.Tasks
         public string Name { get; set; }
         public string Description { get; set; }
         public User? Dev { get; set; }
-        public List<Assignment> RelatedTasks { get;  set; }
+        public List<string> RelatedTasks { get;  set; }
         public AssignmentStatus Status { get;  set; }
         public DateTime? InitDate { get;  set; }
         public DateTime? EndDate { get;  set; }
@@ -24,7 +24,7 @@ namespace GerenciadorDeTarefas.Models.Tasks
             Name = name;
             Description = description;
             Dev = user;
-            RelatedTasks = new List<Assignment>();
+            RelatedTasks = new List<string>();
         }
 
         public void ChangeStatus(AssignmentStatus status)
@@ -37,16 +37,16 @@ namespace GerenciadorDeTarefas.Models.Tasks
             Dev = user;
         }
 
-        public void AddRelatedTask(Assignment relatedTask)
+        public void AddRelatedTask(string relatedTask)
         {
             foreach (var task in RelatedTasks)
             {
-                if (task.Name == relatedTask.Name && task.InitDate == relatedTask.InitDate)
+                if (task == relatedTask)
                 {
                     Console.WriteLine("Essa tarefa já foi adicionada como 'relacionada'!");
                     return;
                 }
-                else if (task.Name == Name && task.InitDate == InitDate)
+                else if (task == this.Name)
                 {
                     Console.WriteLine("Não é possível adicionar a própria tarefa como 'relacionada'!");
                     return;
@@ -63,7 +63,7 @@ namespace GerenciadorDeTarefas.Models.Tasks
             int i = 1;
             foreach (var relatedTask in RelatedTasks)
             {
-                tasks += $"{i} - {relatedTask.Name}\n";
+                tasks += $"{i} - {relatedTask}\n";
                 i++;
             }
             if (tasks.Equals(""))
@@ -99,6 +99,15 @@ namespace GerenciadorDeTarefas.Models.Tasks
         {
             Description = newDescription;
         }
+
+        public string PrintAssignment()
+        {
+            var user = Dev != null ? Dev.Name : "Usuário não atribuído a tarefa.";
+            return $"Nome: {Name}\n" +
+                $"  Descição: {Description}\n" +
+                $"  Usuário: {user}\n";
+        }
+
     }
 
 }
